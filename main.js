@@ -1,13 +1,18 @@
+const morgan = require('morgan')
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors')
 
 const app = express();
 const PORT = 3000;
 const DATA_FILE = path.join(__dirname, 'users.json');
 
+
+app.use(morgan('dev')); // 'dev' is a predefined format for concise colored output
 app.use(bodyParser.json());
+app.use(cors())
 
 // Load or initialize users data
 const loadUsers = () => {
@@ -40,13 +45,13 @@ app.post('/save_user', (req, res) => {
       .json({ success: false, message: 'Name is required.' });
   }
 
-  const existingUser = users.find((user) => user.name === name);
-
-  if (existingUser) {
-    return res
-      .status(400)
-      .json({ success: false, message: 'User already exists.' });
-  }
+  /* const existingUser = users.find((user) => user.name === name); */
+  /**/
+  /* if (existingUser) { */
+  /*   return res */
+  /*     .status(400) */
+  /*     .json({ success: false, message: 'User already exists.' }); */
+  /* } */
   users.push({ name, score: 0 });
   saveUsers(users);
   res.json({ success: true, message: 'User saved successfully.' });
@@ -85,6 +90,10 @@ app.get('/load_user', (req, res) => {
   }
 
   res.json({ success: true, user });
+});
+app.get('/load_users', (req, res) => {
+  const sortedUsers = users.sort((a, b) => b.score - a.score);
+  res.json(sortedUsers);
 });
 
 // Start the server
